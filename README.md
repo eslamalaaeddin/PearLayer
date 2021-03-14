@@ -8,9 +8,9 @@ Java
 ---
 MVC
 ---
-Services
+Services (Foreground & Bound)
 ---
-BroadcastReceviers
+BroadcastRecevier
 ---
 ContentResolver
 ---

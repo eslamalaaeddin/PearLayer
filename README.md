@@ -8,9 +8,9 @@ Java
 ---
 MVC
 ---
-Services
+Services ( Foreground & Bound )
 ---
-BroadcastReceviers
+BroadcastRecevier
 ---
 ContentResolver
 ---
@@ -39,3 +39,5 @@ MediaPlayer class
 <p align="center">
  <img src = "images/5.jpg" width = "256">
 </p>
+
+

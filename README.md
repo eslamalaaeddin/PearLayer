@@ -8,7 +8,7 @@ Java
 ---
 MVC
 ---
-Services (Foreground & Bound)
+Services ( Foreground & Bound )
 ---
 BroadcastRecevier
 ---

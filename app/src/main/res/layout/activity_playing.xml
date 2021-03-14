@@ -101,7 +101,7 @@
         android:layout_marginTop="32dp"
         android:layout_toEndOf="@+id/previousSecondsImageButton"
         android:text="1.00 x"
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorPrimaryDark"
         android:textStyle="bold"
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/seekBarLayout"

@@ -3,6 +3,7 @@ package com.example.mediaplayer.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.content.ComponentName;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.ServiceConnection;

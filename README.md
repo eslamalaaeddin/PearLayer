@@ -40,6 +40,4 @@ MediaPlayer class
  <img src = "images/5.jpg" width = "256">
 </p>
 
-<p align="center">
- <img src = "images/6.jpg" width = "256">
-</p>
+

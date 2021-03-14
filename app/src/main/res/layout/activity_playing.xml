@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/primary_text"
+    tools:context=".ui.PlayingActivity">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/mediaImageView"
+        android:layout_width="256dp"
+        android:layout_height="256dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="64dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <ImageButton
+        android:id="@+id/repeatMediaImageButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_above="@id/mediaControlsBottomSection"
+        android:layout_toEndOf="@id/changeMediaSpeedButton"
+        android:scaleType="centerCrop"
+        android:src="@drawable/ic_repeat_stroked"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/mediaControlsBottomSection"
+        app:layout_constraintEnd_toStartOf="@+id/nextSecondsImageButton"
+        app:layout_constraintStart_toEndOf="@+id/previousSecondsImageButton"
+        app:layout_constraintTop_toTopOf="@+id/previousSecondsImageButton" />
+
+    <LinearLayout
+        android:id="@+id/seekBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/previousSecondsImageButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginBottom="16dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toTopOf="@+id/repeatMediaImageButton"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <androidx.appcompat.widget.AppCompatSeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            />
+
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp">
+
+            <TextView
+                android:id="@+id/currentTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:textColor="#FFFFFF"
+                tools:text="21:13:14" />
+
+            <TextView
+                android:id="@+id/maxTimeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="end"
+                android:layout_marginEnd="8dp"
+                android:textColor="#FFFFFF"
+                tools:text="21:13:14" />
+        </FrameLayout>
+
+    </LinearLayout>
+
+    <ImageButton
+        android:id="@+id/previousSecondsImageButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_above="@id/mediaControlsBottomSection"
+        android:layout_alignParentStart="true"
+        android:src="@drawable/ic_rewind_option"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/mediaControlsBottomSection"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/changeMediaSpeedButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="wrap_content"
+        android:layout_height="64dp"
+        android:layout_above="@id/mediaControlsBottomSection"
+        android:layout_marginTop="32dp"
+        android:layout_toEndOf="@+id/previousSecondsImageButton"
+        android:text="1.00 x"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold"
+        android:visibility="visible"
+        app:layout_constraintBottom_toTopOf="@+id/seekBarLayout"
+        app:layout_constraintEnd_toEndOf="@+id/mediaImageView"
+        app:layout_constraintStart_toStartOf="@+id/mediaImageView"
+        app:layout_constraintTop_toBottomOf="@+id/mediaImageView" />
+
+    <ImageButton
+        android:id="@+id/nextSecondsImageButton"
+        style="@style/Widget.AppCompat.Button.Borderless"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_above="@id/mediaControlsBottomSection"
+        android:layout_alignParentEnd="true"
+        android:src="@drawable/ic_fast_forward_button"
+        android:tint="@color/white"
+        app:layout_constraintBottom_toTopOf="@+id/mediaControlsBottomSection"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/mediaControlsBottomSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:layout_gravity="bottom"
+        android:background="@drawable/semi_round_background"
+        android:backgroundTint="@color/colorPrimaryDark"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="32dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <ImageButton
+            android:id="@+id/previousImageButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_previous"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/playButtonImageButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="72dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_pause"
+            android:tint="#FFFFFF" />
+
+        <ImageButton
+            android:id="@+id/nextMediaImageButton"
+            style="@style/Widget.AppCompat.Button.Borderless"
+            android:layout_width="0dp"
+            android:layout_height="48dp"
+            android:layout_margin="4dp"
+            android:layout_weight="1"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_next_"
+            android:tint="#FFFFFF" />
+
+    </LinearLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

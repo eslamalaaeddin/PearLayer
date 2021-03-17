@@ -91,27 +91,29 @@ public class PlayingActivity extends AppCompatActivity {
         int fromService = intent.getIntExtra("fromService", 0);
         initViews();
 
-        if (fromService == 1){
-//            Toast.makeText(this, "1", Toast.LENGTH_SHORT).show();
-        }
-        else{
+        if (fromService == 1) {
+            int status = intent.getIntExtra("status", -1);
+            if (status == 1) {
+                playMediaImageButton.setImageResource(R.drawable.ic_pause);
+
+            } else {
+                playMediaImageButton.setImageResource(R.drawable.ic_play_button_arrow);
+            }
+        } else {
             playAudio(audioIndex);
-//            Toast.makeText(this, "0", Toast.LENGTH_SHORT).show();
         }
         StorageUtil storageUtil = new StorageUtil(getApplicationContext());
-        if (storageUtil.getRepeatingState()){
+        if (storageUtil.getRepeatingState()) {
             repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_filled);
-        }
-        else{
+        } else {
             repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_stroked);
         }
 
         playMediaImageButton.setOnClickListener(v -> {
-            if (serviceBound && isServiceRunning(MediaPlayerService.class.getName()) && mediaPlayerService.getStatus() == PlaybackStatus.PLAYING){
+            if (serviceBound && isServiceRunning(MediaPlayerService.class.getName()) && mediaPlayerService.getStatus() == PlaybackStatus.PLAYING) {
                 playMediaImageButton.setImageResource(R.drawable.ic_play_button_arrow);
                 mediaPlayerService.onPauseButtonClicked();
-            }
-            else{
+            } else {
                 playMediaImageButton.setImageResource(R.drawable.ic_pause);
                 //order is important
                 mediaPlayerService.onChangeMediaPlayerSpeedClicked();
@@ -130,13 +132,13 @@ public class PlayingActivity extends AppCompatActivity {
         previousMediaImageButton.setOnClickListener(v -> {
             mediaPlayerService.onPreviousButtonClicked();
             long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
-            Utils.setMediaImage(PlayingActivity.this,albId, mediaImageView);
+            Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
         });
 
         nextMediaImageButton.setOnClickListener(v -> {
             mediaPlayerService.onNextButtonClicked();
             long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
-            Utils.setMediaImage(PlayingActivity.this,albId, mediaImageView);
+            Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
         });
 
         changeMediaSpeedButton.setOnClickListener(v -> {
@@ -185,13 +187,12 @@ public class PlayingActivity extends AppCompatActivity {
 //        changeMediaSpeedButton.setText(String.format("%s x", mediaSpeed));
 //    }
 
-    private void handleRepeatingUIState(){
+    private void handleRepeatingUIState() {
         StorageUtil storage = new StorageUtil(getApplicationContext());
-        if (storage.getRepeatingState()){
+        if (storage.getRepeatingState()) {
             repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_stroked);
             storage.setRepeatingState(false);
-        }
-        else{
+        } else {
             repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_filled);
             storage.setRepeatingState(true);
         }
@@ -213,7 +214,6 @@ public class PlayingActivity extends AppCompatActivity {
             changeMediaSpeedButton.setVisibility(View.VISIBLE);
         }
 
-
     }
 
     private void updateSeekBarPosition() {
@@ -231,8 +231,7 @@ public class PlayingActivity extends AppCompatActivity {
                     try {
                         duration = mediaPlayerService.getDuration();
                         progressInSeconds = mediaPlayerService.getCurrentPosition();
-                    }
-                    catch (IllegalStateException ex){
+                    } catch (IllegalStateException ex) {
                         //Toast.makeText(PlayingActivity.this, "Exception", Toast.LENGTH_SHORT).show();
                     }
 
@@ -265,26 +264,15 @@ public class PlayingActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (!serviceBound){
-            if (playerIntent == null){
+        if (!serviceBound) {
+            if (playerIntent == null) {
                 playerIntent = new Intent(this, MediaPlayerService.class);
             }
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         }
-        else{
-            if (isServiceRunning(MediaPlayerService.class.getName()) && mediaPlayerService.getStatus() != null) {
-                if (mediaPlayerService.getStatus() == PlaybackStatus.PLAYING) {
-                    playMediaImageButton.setImageResource(R.drawable.ic_pause);
-                }
-                else{
-                    playMediaImageButton.setImageResource(R.drawable.ic_play_button_arrow);
-                }
-            }
-
-        }
         updateSeekBarPosition();
 
-        if (notificationBroadcastReceiver == null){
+        if (notificationBroadcastReceiver == null) {
             notificationBroadcastReceiver = new NotificationBroadcastReceiver();
             IntentFilter intentFilter1 = new IntentFilter(BROADCAST_PREVIOUS);
             IntentFilter intentFilter2 = new IntentFilter(BROADCAST_CLOSE_NOTIFICATION);
@@ -309,7 +297,7 @@ public class PlayingActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (mediaPlayerService != null){
+        if (mediaPlayerService != null) {
             changeMediaSpeedButton.setText(String.format("%s x", mediaPlayerService.getPlaybackSpeed()));
         }
     }
@@ -364,31 +352,31 @@ public class PlayingActivity extends AppCompatActivity {
         return serviceRunning;
     }
 
-    class NotificationBroadcastReceiver extends BroadcastReceiver{
+    class NotificationBroadcastReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(BROADCAST_PREVIOUS)){
+            if (intent.getAction().equals(BROADCAST_PREVIOUS)) {
                 mediaPlayerService.onPreviousButtonClicked();
                 long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
                 Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
             }
 
-            if (intent.getAction().equals(BROADCAST_NEXT)){
+            if (intent.getAction().equals(BROADCAST_NEXT)) {
                 mediaPlayerService.onNextButtonClicked();
                 long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
                 Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
             }
 
-            if (intent.getAction().equals(BROADCAST_CLOSE_NOTIFICATION)){
+            if (intent.getAction().equals(BROADCAST_CLOSE_NOTIFICATION)) {
                 finishAffinity();
             }
 
-            if (intent.getAction().equals(BROADCAST_PLAY)){
+            if (intent.getAction().equals(BROADCAST_PLAY)) {
                 playMediaImageButton.setImageResource(R.drawable.ic_pause);
             }
 
-            if (intent.getAction().equals(BROADCAST_PAUSE)){
+            if (intent.getAction().equals(BROADCAST_PAUSE)) {
                 playMediaImageButton.setImageResource(R.drawable.ic_play_button_arrow);
             }
 

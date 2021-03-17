@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
     private MediaPlayerService player;
     boolean serviceBound = false;
     static ArrayList<Audio> audioList;
-    private int itemLayout;
 
 
     //Binding this Client to the AudioPlayer Service
@@ -145,6 +144,7 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
     private void initRecyclerView() {
         if (audioList.size() > 0) {
             RecyclerView recyclerView = findViewById(R.id.recyclerview);
+            int itemLayout;
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
                 itemLayout = R.layout.item_layout_portrait;
 //                recyclerView.addItemDecoration(new DividerItemDecoration(recyclerView.getContext(), DividerItemDecoration.VERTICAL));

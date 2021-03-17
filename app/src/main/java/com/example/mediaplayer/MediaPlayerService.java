@@ -60,8 +60,7 @@ public class MediaPlayerService extends Service implements
         MediaPlayer.OnErrorListener,
         AudioManager.OnAudioFocusChangeListener,
         SeekBarListener,
-        MediaStateListener
-{
+        MediaStateListener {
 
     private MediaPlayer mediaPlayer;
 
@@ -88,6 +87,7 @@ public class MediaPlayerService extends Service implements
 
     private float playbackSpeed = 1.0f;
     private boolean repeating = false;
+    private boolean playingBeforeCall = false;
 
     @Override
     public void onCreate() {
@@ -135,7 +135,9 @@ public class MediaPlayerService extends Service implements
                 e.printStackTrace();
                 stopSelf();
             }
+            status = PlaybackStatus.PLAYING;
             buildNotification(PlaybackStatus.PLAYING);
+
         }
 
         //Handle Intent action from MediaSession.TransportControls
@@ -149,15 +151,15 @@ public class MediaPlayerService extends Service implements
         return iBinder;
     }
 
-    public int getCurrentPosition(){
-        if (mediaPlayer == null){
+    public int getCurrentPosition() {
+        if (mediaPlayer == null) {
             return 0;
         }
         return mediaPlayer.getCurrentPosition() / 1000;
     }
 
-    public int getDuration(){
-        if (mediaPlayer == null){
+    public int getDuration() {
+        if (mediaPlayer == null) {
             return 0;
         }
         return mediaPlayer.getDuration() / 1000;
@@ -166,7 +168,7 @@ public class MediaPlayerService extends Service implements
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onPrepared(MediaPlayer mp) {
-            playMedia();
+        playMedia();
     }
 
     @Override
@@ -174,8 +176,7 @@ public class MediaPlayerService extends Service implements
         //this can be used for infinity repeat.
         if (repeating) {
             mp.start();
-        }
-        else{
+        } else {
             //it works but the only issue is that you have to press the start button twice so that it plays again.
             stopMedia();
 //            buildNotification(PlaybackStatus.PAUSED);
@@ -208,16 +209,34 @@ public class MediaPlayerService extends Service implements
         //Invoked when the audio focus of the system is updated.
         switch (focusState) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                // resume playback
-                if (mediaPlayer == null) initMediaPlayer();
-                else if (!mediaPlayer.isPlaying()) mediaPlayer.start();
-                mediaPlayer.setVolume(1.0f, 1.0f);
+                if (hasACall) {
+                    hasACall = false;
+                } else {
+                    // resume playback
+                    if (mediaPlayer == null) {
+                        initMediaPlayer();
+//                        Toast.makeText(this, "Some", Toast.LENGTH_SHORT).show();
+                    } else if (!mediaPlayer.isPlaying()) {
+                        if (status == PlaybackStatus.PLAYING){
+//                            Toast.makeText(this, "Thing", Toast.LENGTH_SHORT).show();
+                            mediaPlayer.start();
+                        }
+
+                    }
+                    mediaPlayer.setVolume(1.0f, 1.0f);
+                }
+
                 break;
             case AudioManager.AUDIOFOCUS_LOSS:
                 // Lost focus for an unbounded amount of time: stop playback and release media player
-                if (mediaPlayer.isPlaying()) mediaPlayer.stop();
-                mediaPlayer.release();
-                mediaPlayer = null;
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.pause();
+//                    Intent intent = new Intent(BROADCAST_PAUSE);
+//                    sendBroadcast(intent);
+                }
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//                mediaPlayer = null;
                 break;
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
                 // Lost focus for a short time, but we have to stop
@@ -243,23 +262,21 @@ public class MediaPlayerService extends Service implements
     public void onPreviousButtonClicked() {
         //Notification is correct but it still plays
         skipToPrevious();
-        if (mediaPlayer.isPlaying()){
+        if (mediaPlayer.isPlaying()) {
             buildNotification(PlaybackStatus.PLAYING);
-        }
-
-        else{
+        } else {
             buildNotification(PlaybackStatus.PAUSED);
         }
     }
 
-    public long getAlbumIdToUpdateMediaImage(){
-        if (activeAudio == null){
+    public long getAlbumIdToUpdateMediaImage() {
+        if (activeAudio == null) {
             return 0;
         }
         return activeAudio.getAlbumId();
     }
 
-    public boolean getRepeatingState(){
+    public boolean getRepeatingState() {
         return repeating;
     }
 
@@ -272,11 +289,9 @@ public class MediaPlayerService extends Service implements
     public void onNextButtonClicked() {
         //Notification is correct but it still plays
         skipToNext();
-        if (mediaPlayer.isPlaying()){
+        if (mediaPlayer.isPlaying()) {
             buildNotification(PlaybackStatus.PLAYING);
-        }
-
-        else{
+        } else {
             buildNotification(PlaybackStatus.PAUSED);
         }
     }
@@ -305,15 +320,13 @@ public class MediaPlayerService extends Service implements
     }
 
 
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     public void onChangeMediaPlayerSpeedClicked() {
-        if (status == PlaybackStatus.PLAYING){
-            if (playbackSpeed == 3.0){
+        if (status == PlaybackStatus.PLAYING) {
+            if (playbackSpeed == 3.0) {
                 playbackSpeed = .25f;
-            }
-            else {
+            } else {
                 playbackSpeed += .25;
             }
             mediaPlayer.setPlaybackParams(mediaPlayer.getPlaybackParams().setSpeed(playbackSpeed));
@@ -391,7 +404,7 @@ public class MediaPlayerService extends Service implements
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
                 skipToPrevious();
-               // updateMetaData();
+                // updateMetaData();
                 buildNotification(PlaybackStatus.PLAYING);
             }
 
@@ -410,7 +423,7 @@ public class MediaPlayerService extends Service implements
         });
     }
 
-    public PlaybackStatus getStatus(){
+    public PlaybackStatus getStatus() {
         return status;
     }
 
@@ -451,20 +464,21 @@ public class MediaPlayerService extends Service implements
         if (mediaPlayer.isPlaying()) {
             mediaPlayer.stop();
         }
-        buildNotification(PlaybackStatus.PAUSED);
         status = PlaybackStatus.PAUSED;
+        buildNotification(PlaybackStatus.PAUSED);
         Intent intent = new Intent(BROADCAST_PAUSE);
         sendBroadcast(intent);
     }
 
     private void pauseMedia() {
-            //if the internal player engine has not been
-            //     * initialized or has been released.
+        //if the internal player engine has not been
+        //     * initialized or has been released.
         //Solution ==> I removed the check if it is playing and it worked fine.
 //        if (mediaPlayer.isPlaying()) {
-            mediaPlayer.pause();
-            status = PlaybackStatus.PAUSED;
-            resumePosition = mediaPlayer.getCurrentPosition();
+        mediaPlayer.pause();
+        status = PlaybackStatus.PAUSED;
+//            buildNotification(PlaybackStatus.PAUSED);
+        resumePosition = mediaPlayer.getCurrentPosition();
 //        }
     }
 
@@ -482,8 +496,7 @@ public class MediaPlayerService extends Service implements
             //if last in playlist
             audioIndex = 0;
             activeAudio = audioList.get(audioIndex);
-        }
-        else {
+        } else {
             //get next in playlist
             activeAudio = audioList.get(++audioIndex);
         }
@@ -527,7 +540,7 @@ public class MediaPlayerService extends Service implements
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
                     NotificationManager.IMPORTANCE_NONE);
 
-            channel.setDescription( getString(R.string.channel_description));
+            channel.setDescription(getString(R.string.channel_description));
 
             NotificationManager notificationManager =
                     getSystemService(NotificationManager.class);
@@ -554,7 +567,11 @@ public class MediaPlayerService extends Service implements
         playingActivityIntent.putExtra("albumId", activeAudio.getAlbumId());
         playingActivityIntent.putExtra("index", audioIndex);
         playingActivityIntent.putExtra("fromService", 1);
-
+        if (status == PlaybackStatus.PLAYING) {
+            playingActivityIntent.putExtra("status", 1);
+        } else {
+            playingActivityIntent.putExtra("status", 0);
+        }
         TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
         stackBuilder.addNextIntentWithParentStack(playingActivityIntent);
         PendingIntent resultPendingIntent =
@@ -586,7 +603,7 @@ public class MediaPlayerService extends Service implements
                 .addAction(R.drawable.ic_cancel, "Exit", playbackAction(4));
 
         ((NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE)).notify(NOTIFICATION_ID, notificationBuilder.build());
-        startForeground(NOTIFICATION_ID,notificationBuilder.build());
+        startForeground(NOTIFICATION_ID, notificationBuilder.build());
     }
 
     private void removeNotification() {
@@ -624,7 +641,6 @@ public class MediaPlayerService extends Service implements
     }
 
 
-
     private void handleIncomingActions(Intent playbackAction) {
         if (playbackAction == null || playbackAction.getAction() == null) return;
 
@@ -636,28 +652,23 @@ public class MediaPlayerService extends Service implements
             //this is considered with the UI (PlayingActivity)
             Intent intent = new Intent(BROADCAST_PLAY);
             sendBroadcast(intent);
-        }
-        else if (actionString.equalsIgnoreCase(ACTION_PAUSE)) {
+        } else if (actionString.equalsIgnoreCase(ACTION_PAUSE)) {
             transportControls.pause();
             status = PlaybackStatus.PAUSED;
             Intent intent = new Intent(BROADCAST_PAUSE);
             sendBroadcast(intent);
-        }
-        else if (actionString.equalsIgnoreCase(ACTION_NEXT)) {
+        } else if (actionString.equalsIgnoreCase(ACTION_NEXT)) {
             transportControls.skipToNext();
             Intent intent = new Intent(BROADCAST_NEXT);
             sendBroadcast(intent);
 
-        }
-        else if (actionString.equalsIgnoreCase(ACTION_PREVIOUS)) {
+        } else if (actionString.equalsIgnoreCase(ACTION_PREVIOUS)) {
             transportControls.skipToPrevious();
             Intent intent = new Intent(BROADCAST_PREVIOUS);
             sendBroadcast(intent);
-        }
-        else if (actionString.equalsIgnoreCase(ACTION_STOP)) {
+        } else if (actionString.equalsIgnoreCase(ACTION_STOP)) {
             transportControls.stop();
-        }
-        else if (actionString.equalsIgnoreCase(ACTION_EXIT)){
+        } else if (actionString.equalsIgnoreCase(ACTION_EXIT)) {
             stopMedia();
             stopForeground(true);
             stopSelf();
@@ -683,18 +694,25 @@ public class MediaPlayerService extends Service implements
                     case TelephonyManager.CALL_STATE_RINGING:
                         if (mediaPlayer != null) {
                             pauseMedia();
+                            Intent intent = new Intent(BROADCAST_PAUSE);
+                            sendBroadcast(intent);
                             hasACall = true;
                         }
                         break;
-                    case TelephonyManager.CALL_STATE_IDLE:
-                        // Phone idle. Start playing.
-                        if (mediaPlayer != null) {
-                            if (hasACall) {
-                                hasACall = false;
-                                resumeMedia();
-                            }
-                        }
-                        break;
+//                    case TelephonyManager.CALL_STATE_IDLE:
+//                        // Phone idle. Start playing.
+//                        if (mediaPlayer != null) {
+//                            if (hasACall) {
+////                                hasACall = false;
+////                                pauseMedia();
+////                                Intent intent = new Intent(BROADCAST_PAUSE);
+////                                sendBroadcast(intent);
+////                                Intent intent = new Intent(BROADCAST_PLAY);
+////                                sendBroadcast(intent);
+////                                resumeMedia();
+//                            }
+//                        }
+//                        break;
                 }
             }
         };
@@ -713,8 +731,6 @@ public class MediaPlayerService extends Service implements
             buildNotification(PlaybackStatus.PAUSED);
         }
     };
-
-
 
     private final BroadcastReceiver playNewAudio = new BroadcastReceiver() {
         @Override
@@ -773,7 +789,6 @@ public class MediaPlayerService extends Service implements
 
         //clear cached playlist
         new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
-        Toast.makeText(this, "Destroy", Toast.LENGTH_SHORT).show();
     }
 
 }

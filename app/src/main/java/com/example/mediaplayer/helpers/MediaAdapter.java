@@ -11,7 +11,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mediaplayer.Utils;
 import com.example.mediaplayer.models.Audio;
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.listeners.MediaClickListener;

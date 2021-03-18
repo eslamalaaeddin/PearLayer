@@ -21,9 +21,8 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.example.mediaplayer.Utils;
+import com.example.mediaplayer.helpers.Utils;
 import com.example.mediaplayer.MediaPlayerService;
 import com.example.mediaplayer.helpers.PlaybackStatus;
 import com.example.mediaplayer.R;

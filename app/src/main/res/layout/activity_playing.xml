@@ -9,12 +9,12 @@
 
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/mediaImageView"
-        android:layout_width="256dp"
-        android:layout_height="256dp"
+        android:layout_width="224dp"
+        android:layout_height="224dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_gravity="center|top"
-        android:layout_marginTop="64dp"
+        app:layout_constraintBottom_toTopOf="@+id/changeMediaSpeedButton"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -87,6 +87,7 @@
         android:layout_height="64dp"
         android:layout_above="@id/mediaControlsBottomSection"
         android:layout_alignParentStart="true"
+        android:scaleType="centerInside"
         android:src="@drawable/ic_rewind_option"
         android:tint="@color/white"
         app:layout_constraintBottom_toTopOf="@+id/mediaControlsBottomSection"
@@ -98,7 +99,7 @@
         android:layout_width="wrap_content"
         android:layout_height="64dp"
         android:layout_above="@id/mediaControlsBottomSection"
-        android:layout_marginTop="32dp"
+        android:layout_marginBottom="24dp"
         android:layout_toEndOf="@+id/previousSecondsImageButton"
         android:text="1.00 x"
         android:textColor="@color/colorPrimaryDark"
@@ -106,14 +107,14 @@
         android:visibility="visible"
         app:layout_constraintBottom_toTopOf="@+id/seekBarLayout"
         app:layout_constraintEnd_toEndOf="@+id/mediaImageView"
-        app:layout_constraintStart_toStartOf="@+id/mediaImageView"
-        app:layout_constraintTop_toBottomOf="@+id/mediaImageView" />
+        app:layout_constraintStart_toStartOf="@+id/mediaImageView" />
 
     <ImageButton
         android:id="@+id/nextSecondsImageButton"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="64dp"
         android:layout_height="64dp"
+        android:scaleType="centerInside"
         android:layout_above="@id/mediaControlsBottomSection"
         android:layout_alignParentEnd="true"
         android:src="@drawable/ic_fast_forward_button"

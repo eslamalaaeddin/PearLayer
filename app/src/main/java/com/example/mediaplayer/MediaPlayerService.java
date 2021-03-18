@@ -21,7 +21,6 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -29,6 +28,7 @@ import androidx.core.app.TaskStackBuilder;
 
 import com.example.mediaplayer.helpers.PlaybackStatus;
 import com.example.mediaplayer.helpers.StorageUtil;
+import com.example.mediaplayer.helpers.Utils;
 import com.example.mediaplayer.listeners.MediaStateListener;
 import com.example.mediaplayer.listeners.SeekBarListener;
 import com.example.mediaplayer.models.Audio;
@@ -539,14 +539,15 @@ public class MediaPlayerService extends Service implements
 
         //1 Create the channel
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-
             NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME,
-                    NotificationManager.IMPORTANCE_NONE);
+                    NotificationManager.IMPORTANCE_LOW);
 
+            channel.setSound(null, null);
+            channel.setShowBadge(false);
+            channel.setImportance(NotificationManager.IMPORTANCE_LOW);
             channel.setDescription(getString(R.string.channel_description));
 
-            NotificationManager notificationManager =
-                    getSystemService(NotificationManager.class);
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
 

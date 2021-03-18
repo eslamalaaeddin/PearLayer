@@ -1,4 +1,4 @@
-package com.example.mediaplayer;
+package com.example.mediaplayer.helpers;
 
 import android.content.ContentUris;
 import android.content.Context;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.example.mediaplayer.R;
 
 import java.io.FileDescriptor;
 

@@ -258,16 +258,7 @@ public class MediaPlayerService extends Service implements
         mediaPlayer.seekTo(currentPosition * 1000);
     }
 
-    @Override
-    public void onPreviousButtonClicked() {
-        //Notification is correct but it still plays
-        skipToPrevious();
-        if (mediaPlayer.isPlaying()) {
-            buildNotification(PlaybackStatus.PLAYING);
-        } else {
-            buildNotification(PlaybackStatus.PAUSED);
-        }
-    }
+
 
     public long getAlbumIdToUpdateMediaImage() {
         if (activeAudio == null) {
@@ -284,16 +275,28 @@ public class MediaPlayerService extends Service implements
         return playbackSpeed;
     }
 
+    @Override
+    public void onPreviousButtonClicked() {
+        //Notification is correct but it still plays
+        skipToPrevious();
+//        if (mediaPlayer.isPlaying()) {
+//            buildNotification(PlaybackStatus.PLAYING);
+//        } else {
+//            buildNotification(PlaybackStatus.PAUSED);
+//        }
+//        Toast.makeText(this, "PreviousClicked", Toast.LENGTH_SHORT).show();
+    }
 
     @Override
     public void onNextButtonClicked() {
         //Notification is correct but it still plays
         skipToNext();
-        if (mediaPlayer.isPlaying()) {
-            buildNotification(PlaybackStatus.PLAYING);
-        } else {
-            buildNotification(PlaybackStatus.PAUSED);
-        }
+//        Toast.makeText(this, "NextClicked", Toast.LENGTH_SHORT).show();
+//        if (mediaPlayer.isPlaying()) {
+//            buildNotification(PlaybackStatus.PLAYING);
+//        } else {
+//            buildNotification(PlaybackStatus.PAUSED);
+//        }
     }
 
     @Override
@@ -395,24 +398,21 @@ public class MediaPlayerService extends Service implements
             @Override
             public void onSkipToNext() {
                 super.onSkipToNext();
+//                Toast.makeText(MediaPlayerService.this, "OnSkpNxt", Toast.LENGTH_SHORT).show();
                 skipToNext();
-                //updateMetaData();
-                buildNotification(PlaybackStatus.PLAYING);
             }
 
             @Override
             public void onSkipToPrevious() {
                 super.onSkipToPrevious();
+//                Toast.makeText(MediaPlayerService.this, "OnSkpPrvs", Toast.LENGTH_SHORT).show();
                 skipToPrevious();
-                // updateMetaData();
-                buildNotification(PlaybackStatus.PLAYING);
             }
 
             @Override
             public void onStop() {
                 super.onStop();
                 removeNotification();
-                //Stop the service
                 stopSelf();
             }
 
@@ -454,6 +454,7 @@ public class MediaPlayerService extends Service implements
         if (!mediaPlayer.isPlaying()) {
             mediaPlayer.start();
             status = PlaybackStatus.PLAYING;
+            buildNotification(PlaybackStatus.PLAYING);
             Intent intent = new Intent(BROADCAST_PLAY);
             sendBroadcast(intent);
         }
@@ -508,6 +509,7 @@ public class MediaPlayerService extends Service implements
         //reset mediaPlayer
         mediaPlayer.reset();
         initMediaPlayer();
+
     }
 
     private void skipToPrevious() {
@@ -528,6 +530,7 @@ public class MediaPlayerService extends Service implements
         //reset mediaPlayer
         mediaPlayer.reset();
         initMediaPlayer();
+
     }
 
     ///////////////////////////////////////
@@ -555,7 +558,8 @@ public class MediaPlayerService extends Service implements
         if (playbackStatus == PlaybackStatus.PLAYING) {
             //create the pause action
             playPauseAction = playbackAction(1);
-        } else if (playbackStatus == PlaybackStatus.PAUSED) {
+        }
+        else if (playbackStatus == PlaybackStatus.PAUSED) {
             notificationAction = R.drawable.ic_play_button_arrow;
             //create the play action
             playPauseAction = playbackAction(0);

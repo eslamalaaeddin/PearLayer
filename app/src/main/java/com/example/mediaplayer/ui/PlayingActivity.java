@@ -141,11 +141,12 @@ public class PlayingActivity extends AppCompatActivity {
             Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
         });
 
-        changeMediaSpeedButton.setOnClickListener(v -> {
-
-            mediaPlayerService.onChangeMediaPlayerSpeedClicked();
-            changeMediaSpeedButton.setText(String.format("%s x", mediaPlayerService.getPlaybackSpeed()));
-        });
+        if (changeMediaSpeedButton != null) {
+            changeMediaSpeedButton.setOnClickListener(v -> {
+                mediaPlayerService.onChangeMediaPlayerSpeedClicked();
+                changeMediaSpeedButton.setText(String.format("%s x", mediaPlayerService.getPlaybackSpeed()));
+            });
+        }
 
         repeatMediaImageButton.setOnClickListener(v -> {
             handleRepeatingUIState();
@@ -247,6 +248,7 @@ public class PlayingActivity extends AppCompatActivity {
                 String currentTime = convertMediaDuration(currentSeconds, currentMinutes, currentHours);
                 String maxTime = convertMediaDuration(maxSeconds, maxMinutes, maxHours);
 
+                
                 seekBar.setMax(duration);
                 currentTimeTextView.setText(currentTime);
                 maxTimeTextView.setText(maxTime);
@@ -357,13 +359,13 @@ public class PlayingActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(BROADCAST_PREVIOUS)) {
-                mediaPlayerService.onPreviousButtonClicked();
+                //mediaPlayerService.onPreviousButtonClicked();
                 long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
                 Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
             }
 
             if (intent.getAction().equals(BROADCAST_NEXT)) {
-                mediaPlayerService.onNextButtonClicked();
+                //mediaPlayerService.onNextButtonClicked();
                 long albId = mediaPlayerService.getAlbumIdToUpdateMediaImage();
                 Utils.setMediaImage(PlayingActivity.this, albId, mediaImageView);
             }

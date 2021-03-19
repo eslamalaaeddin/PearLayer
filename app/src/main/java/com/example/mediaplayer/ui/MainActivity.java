@@ -31,13 +31,14 @@ import com.example.mediaplayer.helpers.MediaAdapter;
 import com.example.mediaplayer.MediaPlayerService;
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.listeners.MediaClickListener;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements MediaClickListener {
     private static final String TAG="MainActivity";
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.example.mediaplayer.PlayNewAudio";
-    static ArrayList<Audio> audioList;
+    static ArrayList<Audio> audioList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -107,8 +108,8 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
     }
 
     private void initRecyclerView() {
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);;
         if (audioList.size() > 0) {
-            RecyclerView recyclerView = findViewById(R.id.recyclerview);
             int itemLayout;
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
                 itemLayout = R.layout.item_layout_portrait;
@@ -121,10 +122,17 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
             recyclerView.setAdapter(adapter);
 
         }
+        else {
+            Snackbar snackbar = Snackbar
+                    .make(recyclerView, "No media found", Snackbar.LENGTH_INDEFINITE);
+            snackbar.show();
+
+        }
     }
 
     private void playAudio(int audioIndex, Audio audio) {
         Intent tempIntent = new Intent(this, PlayingActivity.class);
+        Log.i(TAG, "MAWZY playAudio: " + audio);
         tempIntent.putExtra("index", audioIndex);
         tempIntent.putExtra("albumId", audio.getAlbumId());
         startActivity(tempIntent);

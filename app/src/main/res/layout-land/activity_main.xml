@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
         app:spanCount="3"
+        android:background="@color/primary_text"
         android:layout_height="match_parent" />
 
 </FrameLayout>

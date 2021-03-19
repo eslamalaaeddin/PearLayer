@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.session.MediaSessionManager;
@@ -26,6 +27,9 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.TaskStackBuilder;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.mediaplayer.helpers.PlaybackStatus;
 import com.example.mediaplayer.helpers.StorageUtil;
 import com.example.mediaplayer.helpers.Utils;
@@ -62,6 +66,7 @@ public class MediaPlayerService extends Service implements
         SeekBarListener,
         MediaStateListener {
 
+    private static final String TAG = "MediaPlayerService";
     private MediaPlayer mediaPlayer;
 
     private int resumePosition;
@@ -439,12 +444,15 @@ public class MediaPlayerService extends Service implements
         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         try {
             // Set the data source to the mediaFile location
+            Log.i(TAG, "KOKO initMediaPlayer: " + activeAudio);
             mediaPlayer.setDataSource(activeAudio.getData());
+            mediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
             stopSelf();
         }
-        mediaPlayer.prepareAsync();
+
+//        mediaPlayer.prepareAsync();
     }
 
     ///////////////////////////////////////
@@ -567,6 +575,11 @@ public class MediaPlayerService extends Service implements
         }
 
         Bitmap largeIcon = Utils.getLogoBitmap(this, activeAudio.getAlbumId());
+        Log.i(TAG, "MAWZY buildNotification: " + largeIcon);
+        if (largeIcon == null){
+            largeIcon = BitmapFactory.decodeResource(getResources(),
+                    R.drawable.ic_notification_logo);
+        }
         Intent playingActivityIntent = new Intent(this, PlayingActivity.class);
 
         playingActivityIntent.putExtra("albumId", activeAudio.getAlbumId());
@@ -598,7 +611,7 @@ public class MediaPlayerService extends Service implements
                 .setLargeIcon(largeIcon)
                 .setSmallIcon(R.drawable.ic_logo)
 //                .setSmallIcon(R.drawable.ic_notification_logo)
-                .setContentTitle(activeAudio.getAlbum())
+                .setContentTitle(activeAudio.getTitle())
                 .setContentInfo(activeAudio.getTitle())
                 .setContentIntent(resultPendingIntent)
                 // Add playback actions

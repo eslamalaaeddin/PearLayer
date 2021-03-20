@@ -16,19 +16,16 @@ public class StorageUtil {
 
     private final String STORAGE = " com.example.mediaplayer.STORAGE";
     private SharedPreferences preferences;
-    private Context context;
+    private final Context context;
 
     public StorageUtil(Context context) {
         this.context = context;
     }
 
-    public void storeAudio(ArrayList<Audio> arrayList) {
+    public void storeAudio(String jsonArrayList) {
         preferences = context.getSharedPreferences(STORAGE, Context.MODE_PRIVATE);
-
         SharedPreferences.Editor editor = preferences.edit();
-        Gson gson = new Gson();
-        String json = gson.toJson(arrayList);
-        editor.putString("audioArrayList", json);
+        editor.putString("audioArrayList", jsonArrayList);
         editor.apply();
     }
 

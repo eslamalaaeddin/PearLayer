@@ -37,7 +37,6 @@ import static com.example.mediaplayer.helpers.Constants.BROADCAST_PAUSE;
 import static com.example.mediaplayer.helpers.Constants.BROADCAST_PLAY;
 import static com.example.mediaplayer.helpers.Constants.BROADCAST_PLAY_NEW_AUDIO;
 import static com.example.mediaplayer.helpers.Constants.BROADCAST_PREVIOUS;
-import static com.example.mediaplayer.ui.MainActivity.audioList;
 
 public class PlayingActivity extends AppCompatActivity {
     private static final String TAG = "PlayingActivity";
@@ -60,6 +59,7 @@ public class PlayingActivity extends AppCompatActivity {
 
     private Handler handler;
 
+    private String jsonArrayList;
     //Binding this Client to the AudioPlayer Service
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
@@ -86,6 +86,7 @@ public class PlayingActivity extends AppCompatActivity {
         Intent intent = getIntent();
         albumId = intent.getLongExtra("albumId", 0);
         int audioIndex = intent.getIntExtra("index", 0);
+        jsonArrayList= intent.getStringExtra("jsonArrayList");
 
         int fromService = intent.getIntExtra("fromService", 0);
         initViews();
@@ -308,7 +309,7 @@ public class PlayingActivity extends AppCompatActivity {
         if (!isServiceRunning(MediaPlayerService.class.getName())) {
             if (!serviceBound) {
                 //Store Serializable audioList to SharedPreferences
-                storage.storeAudio(audioList);
+                storage.storeAudio(jsonArrayList);
                 storage.storeAudioIndex(audioIndex);
                 playerIntent = new Intent(this, MediaPlayerService.class);
                 ContextCompat.startForegroundService(this, playerIntent);
@@ -317,7 +318,7 @@ public class PlayingActivity extends AppCompatActivity {
         }
         //Foreground is running
         else {
-            storage.storeAudio(audioList);
+            storage.storeAudio(jsonArrayList);
             storage.storeAudioIndex(audioIndex);
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_AUDIO);
             sendBroadcast(broadcastIntent);

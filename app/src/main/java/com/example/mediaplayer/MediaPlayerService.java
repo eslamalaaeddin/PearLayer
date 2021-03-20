@@ -747,7 +747,6 @@ public class MediaPlayerService extends Service implements
     private final BroadcastReceiver becomingNoisyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            //pause audio on ACTION_AUDIO_BECOMING_NOISY
             pauseMedia();
             buildNotification(PlaybackStatus.PAUSED);
         }

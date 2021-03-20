@@ -32,13 +32,16 @@ import com.example.mediaplayer.MediaPlayerService;
 import com.example.mediaplayer.R;
 import com.example.mediaplayer.listeners.MediaClickListener;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity implements MediaClickListener {
     private static final String TAG="MainActivity";
     public static final String Broadcast_PLAY_NEW_AUDIO = "com.example.mediaplayer.PlayNewAudio";
-    static ArrayList<Audio> audioList = new ArrayList<>();
+    private final ArrayList<Audio> audioList = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +125,7 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
             else {
                 itemLayout = R.layout.item_layout_landscape;
             }
+
             MediaAdapter adapter = new MediaAdapter(audioList, getApplication(), this, itemLayout);
             recyclerView.setAdapter(adapter);
 
@@ -136,9 +140,13 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
 
     private void playAudio(int audioIndex, Audio audio) {
         Intent tempIntent = new Intent(this, PlayingActivity.class);
+        Gson gson = new Gson();
+        String jsonArrayList = gson.toJson(audioList);
         Log.i(TAG, "MAWZY playAudio: " + audio);
         tempIntent.putExtra("index", audioIndex);
         tempIntent.putExtra("albumId", audio.getAlbumId());
+        tempIntent.putExtra("jsonArrayList", jsonArrayList);
+
         startActivity(tempIntent);
     }
 

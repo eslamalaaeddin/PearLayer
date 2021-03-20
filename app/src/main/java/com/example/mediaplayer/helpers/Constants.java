@@ -20,6 +20,7 @@ public class Constants {
     public static final String ACTION_NEXT = "com.example.mediaplayer.ACTION_NEXT";
     public static final String ACTION_STOP = "com.example.mediaplayer.ACTION_STOP";
     public static final String ACTION_EXIT = "com.example.mediaplayer.ACTION_EXIT";
+    public static final String ACTION_VOLUME_CHANGE= "android.media.VOLUME_CHANGED_ACTION";
 
     /*
         NOTIFICATION

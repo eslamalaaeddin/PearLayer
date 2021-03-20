@@ -45,7 +45,6 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         grantPermissionsAndLoadAudio();
-
     }
 
     @Override
@@ -74,7 +73,6 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
                     new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE},
                     1);
         }
-
         else {
             loadAudio();
             initRecyclerView();
@@ -90,12 +88,17 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
         Cursor cursor = contentResolver.query(uri, null, selection, null, sortOrder);
 
         if (cursor != null && cursor.getCount() > 0) {
-            audioList = new ArrayList<>();
             while (cursor.moveToNext()) {
                 String data = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
                 String title = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.TITLE));
-                String album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
-                String artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                String album = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    album = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM));
+                }
+                String artist = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    artist = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.ARTIST));
+                }
                 long albumId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
 
                 // Save to audioList
@@ -103,12 +106,13 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
                 Log.i(TAG, "ISLAM loadAudio: "+audioList.get(0));
             }
         }
-        assert cursor != null;
-        cursor.close();
+        if (cursor != null){
+            cursor.close();
+        }
     }
 
     private void initRecyclerView() {
-        RecyclerView recyclerView = findViewById(R.id.recyclerview);;
+        RecyclerView recyclerView = findViewById(R.id.recyclerview);
         if (audioList.size() > 0) {
             int itemLayout;
             if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){

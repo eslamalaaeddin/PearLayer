@@ -22,6 +22,7 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
@@ -30,6 +31,7 @@ import androidx.core.app.TaskStackBuilder;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.mediaplayer.helpers.Constants;
 import com.example.mediaplayer.helpers.PlaybackStatus;
 import com.example.mediaplayer.helpers.StorageUtil;
 import com.example.mediaplayer.helpers.Utils;
@@ -100,6 +102,7 @@ public class MediaPlayerService extends Service implements
         callStateListener();
         registerBecomingNoisyReceiver();
         registerPlayNewAudio();
+        registerVolumeChange();
     }
 
     @Override
@@ -750,6 +753,21 @@ public class MediaPlayerService extends Service implements
         }
     };
 
+    //VolumeChange
+    private final BroadcastReceiver volumeChangeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int volume = (Integer)intent.getExtras().get("android.media.EXTRA_VOLUME_STREAM_VALUE");
+            if (volume == 0){
+                status = PlaybackStatus.PAUSED;
+                Intent pauseMediaIntent = new Intent(BROADCAST_PAUSE);
+                sendBroadcast(pauseMediaIntent);
+                pauseMedia();
+                buildNotification(PlaybackStatus.PAUSED);
+            }
+        }
+    };
+
     private final BroadcastReceiver playNewAudio = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -785,6 +803,12 @@ public class MediaPlayerService extends Service implements
         registerReceiver(playNewAudio, filter);
     }
 
+    private void registerVolumeChange() {
+        //Register playNewMedia receiver
+        IntentFilter filter = new IntentFilter(Constants.ACTION_VOLUME_CHANGE);
+        registerReceiver(volumeChangeReceiver, filter);
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -804,7 +828,7 @@ public class MediaPlayerService extends Service implements
         //unregister BroadcastReceivers
         unregisterReceiver(becomingNoisyReceiver);
         unregisterReceiver(playNewAudio);
-
+        unregisterReceiver(volumeChangeReceiver);
         //clear cached playlist
         new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
     }

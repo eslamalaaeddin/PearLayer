@@ -12,7 +12,7 @@ Services ( Foreground & Bound )
 ---
 BroadcastRecevier
 ---
-ContentResolver
+ContentProvider
 ---
 MediaPlayer class
 ---

@@ -1,9 +1,5 @@
 package com.example.mediaplayer.ui;
 
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -15,6 +11,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -22,12 +19,19 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.example.mediaplayer.helpers.Utils;
-import com.example.mediaplayer.MediaPlayerService;
-import com.example.mediaplayer.helpers.PlaybackStatus;
-import com.example.mediaplayer.R;
-import com.example.mediaplayer.helpers.StorageUtil;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
+import com.example.mediaplayer.MediaPlayerService;
+import com.example.mediaplayer.R;
+import com.example.mediaplayer.helpers.PlaybackStatus;
+import com.example.mediaplayer.helpers.StorageUtil;
+import com.example.mediaplayer.helpers.Utils;
+import com.example.mediaplayer.models.Audio;
+import com.google.gson.Gson;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -57,17 +61,18 @@ public class PlayingActivity extends AppCompatActivity {
     private Button changeMediaSpeedButton;
     private ImageButton repeatMediaImageButton;
 
-    private Handler handler;
+    private Handler audioProgressHandler;
+    private String audiosAsJson;
 
-    private String jsonArrayList;
-    //Binding this Client to the AudioPlayer Service
     private final ServiceConnection serviceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
-            MediaPlayerService.LocalBinder binder = (MediaPlayerService.LocalBinder) service;
+            MediaPlayerService.ServiceBinder binder = (MediaPlayerService.ServiceBinder) service;
             mediaPlayerService = binder.getService();
             serviceBound = true;
+            if (mediaPlayerService != null) {
+                changeMediaSpeedButton.setText(String.format("%s x", mediaPlayerService.getPlaybackSpeed()));
+            }
         }
 
         @Override
@@ -76,7 +81,6 @@ public class PlayingActivity extends AppCompatActivity {
         }
     };
 
-
     @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,15 +88,25 @@ public class PlayingActivity extends AppCompatActivity {
         setContentView(R.layout.activity_playing);
 
         Intent intent = getIntent();
+
         albumId = intent.getLongExtra("albumId", 0);
         int audioIndex = intent.getIntExtra("index", 0);
-        jsonArrayList= intent.getStringExtra("jsonArrayList");
+        audiosAsJson = intent.getStringExtra("jsonArrayList");
+//        if (audiosAsJson == null) {
+//            String data = intent.getExtras().getString("AbsolutePath");
+//            Audio audio = new Audio(data,"","","",0);
+//            audiosAsJson = new Gson().toJson(new ArrayList<Audio>().add(audio));
+//        }
 
         int fromService = intent.getIntExtra("fromService", 0);
+
+
         initViews();
 
+        //if activity is created from a notification click
         if (fromService == 1) {
             int status = intent.getIntExtra("status", -1);
+            //status 1 -- means media is playing
             if (status == 1) {
                 playMediaImageButton.setImageResource(R.drawable.ic_pause);
 
@@ -121,13 +135,9 @@ public class PlayingActivity extends AppCompatActivity {
             }
         });
 
-        previousSecondsImageButton.setOnClickListener(v -> {
-            mediaPlayerService.onBackwardMediaButtonClicked();
-        });
+        previousSecondsImageButton.setOnClickListener(v -> mediaPlayerService.onBackwardMediaButtonClicked());
 
-        nextSecondsImageButton.setOnClickListener(v -> {
-            mediaPlayerService.onForwardMediaButtonClicked();
-        });
+        nextSecondsImageButton.setOnClickListener(v -> mediaPlayerService.onForwardMediaButtonClicked());
 
         previousMediaImageButton.setOnClickListener(v -> {
             mediaPlayerService.onPreviousButtonClicked();
@@ -156,12 +166,10 @@ public class PlayingActivity extends AppCompatActivity {
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
             }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
-
             }
 
             @Override
@@ -170,23 +178,6 @@ public class PlayingActivity extends AppCompatActivity {
             }
         });
     }
-
-//    private void getRepeatingStateFromSharedPrefs() {
-//        StorageUtil storage = new StorageUtil(getApplicationContext());
-//        boolean repeatingState = storage.getRepeatingState();
-//        if (repeatingState){
-//            repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_filled);
-//        }
-//        else{
-//            repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_stroked);
-//        }
-//    }
-
-//    private void getPlayingSpeedFromShardPrefs() {
-//        StorageUtil storage = new StorageUtil(getApplicationContext());
-//        float mediaSpeed = storage.getMediaSpeed();
-//        changeMediaSpeedButton.setText(String.format("%s x", mediaSpeed));
-//    }
 
     private void handleRepeatingUIState() {
         StorageUtil storage = new StorageUtil(getApplicationContext());
@@ -197,7 +188,6 @@ public class PlayingActivity extends AppCompatActivity {
             repeatMediaImageButton.setImageResource(R.drawable.ic_repeat_filled);
             storage.setRepeatingState(true);
         }
-
     }
 
     private void initViews() {
@@ -218,11 +208,11 @@ public class PlayingActivity extends AppCompatActivity {
     }
 
     private void updateSeekBarPosition() {
-        handler = new Handler();
+        audioProgressHandler = new Handler();
         final TextView currentTimeTextView = findViewById(R.id.currentTimeTextView);
         final TextView maxTimeTextView = findViewById(R.id.maxTimeTextView);
 
-        handler.post(new Runnable() {
+        audioProgressHandler.post(new Runnable() {
 
             @Override
             public void run() {
@@ -248,12 +238,12 @@ public class PlayingActivity extends AppCompatActivity {
                 String currentTime = convertMediaDuration(currentSeconds, currentMinutes, currentHours);
                 String maxTime = convertMediaDuration(maxSeconds, maxMinutes, maxHours);
 
-                
+
                 seekBar.setMax(duration);
                 currentTimeTextView.setText(currentTime);
                 maxTimeTextView.setText(maxTime);
                 seekBar.setProgress(progressInSeconds);
-                handler.postDelayed(this, 1000);
+                audioProgressHandler.postDelayed(this, 1000);
             }
         });
     }
@@ -267,10 +257,9 @@ public class PlayingActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (!serviceBound) {
-            if (playerIntent == null) {
-                playerIntent = new Intent(this, MediaPlayerService.class);
-            }
+            playerIntent = new Intent(this, MediaPlayerService.class);
             bindService(playerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
         }
         updateSeekBarPosition();
 
@@ -293,15 +282,11 @@ public class PlayingActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-        handler.removeCallbacksAndMessages(null);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if (mediaPlayerService != null) {
-            changeMediaSpeedButton.setText(String.format("%s x", mediaPlayerService.getPlaybackSpeed()));
-        }
+        audioProgressHandler.removeCallbacksAndMessages(null);
+        //it crashes when i try this code so i will move it to onDestroy()
+//        if (serviceBound) {
+//            unbindService(serviceConnection);
+//        }
     }
 
     private void playAudio(int audioIndex) {
@@ -309,7 +294,7 @@ public class PlayingActivity extends AppCompatActivity {
         if (!isServiceRunning(MediaPlayerService.class.getName())) {
             if (!serviceBound) {
                 //Store Serializable audioList to SharedPreferences
-                storage.storeAudio(jsonArrayList);
+                storage.storeAudio(audiosAsJson);
                 storage.storeAudioIndex(audioIndex);
                 playerIntent = new Intent(this, MediaPlayerService.class);
                 ContextCompat.startForegroundService(this, playerIntent);
@@ -318,7 +303,7 @@ public class PlayingActivity extends AppCompatActivity {
         }
         //Foreground is running
         else {
-            storage.storeAudio(jsonArrayList);
+            storage.storeAudio(audiosAsJson);
             storage.storeAudioIndex(audioIndex);
             Intent broadcastIntent = new Intent(BROADCAST_PLAY_NEW_AUDIO);
             sendBroadcast(broadcastIntent);
@@ -329,12 +314,12 @@ public class PlayingActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //has to be moved to onStop() instead.
         if (serviceBound) {
             unbindService(serviceConnection);
+            //i think below code will avoid memory leaks
+            mediaPlayerService = null;
         }
-        // if i did'nt comment this, it would throw an exception if i want to just use the notification without the playing activ..
-        //new StorageUtil(getApplicationContext()).clearCachedAudioPlaylist();
-
         if (notificationBroadcastReceiver != null) {
             unregisterReceiver(notificationBroadcastReceiver);
         }

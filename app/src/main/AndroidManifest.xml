@@ -25,17 +25,18 @@
             android:name=".ui.PlayingActivity"
             android:launchMode="singleTop"
             android:parentActivityName=".ui.MainActivity"
-            android:screenOrientation="portrait" />
-        <activity
-            android:name=".TestActivity"
-            android:label="@string/title_activity_test"
-            android:parentActivityName=".ui.MainActivity"
-            android:theme="@style/Theme.MediaPlayer.NoActionBar">
+            android:screenOrientation="portrait" >
 
-            <!-- <intent-filter> -->
-            <!-- <action android:name="android.intent.action.MAIN" /> -->
-            <!-- <category android:name="android.intent.category.LAUNCHER" /> -->
-            <!-- </intent-filter> -->
+<!--            <intent-filter>-->
+<!--                <action android:name="android.intent.action.VIEW" />-->
+<!--                &lt;!&ndash; it is used to get the intent in my activity&ndash;&gt;-->
+<!--                <category android:name="android.intent.category.DEFAULT" />-->
+<!--                <data android:scheme="content"/>-->
+<!--                <data android:scheme="file"/>-->
+<!--                <data android:mimeType="audio/*"/>-->
+
+<!--            </intent-filter>-->
+
         </activity>
 
         <service

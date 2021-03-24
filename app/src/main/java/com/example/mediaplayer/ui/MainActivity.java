@@ -1,19 +1,13 @@
 package com.example.mediaplayer.ui;
 
 import android.Manifest;
-import android.app.Activity;
-import android.content.ComponentName;
-import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.content.pm.ConfigurationInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.widget.Toast;
@@ -22,25 +16,19 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.mediaplayer.models.Audio;
-import com.example.mediaplayer.helpers.MediaAdapter;
-import com.example.mediaplayer.MediaPlayerService;
 import com.example.mediaplayer.R;
+import com.example.mediaplayer.helpers.MediaAdapter;
 import com.example.mediaplayer.listeners.MediaClickListener;
+import com.example.mediaplayer.models.Audio;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity implements MediaClickListener {
     private static final String TAG="MainActivity";
-    public static final String Broadcast_PLAY_NEW_AUDIO = "com.example.mediaplayer.PlayNewAudio";
     private final ArrayList<Audio> audioList = new ArrayList<>();
 
     @Override
@@ -48,7 +36,10 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         grantPermissionsAndLoadAudio();
+
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -104,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
                 }
                 long albumId = cursor.getLong(cursor.getColumnIndex(MediaStore.Audio.Media.ALBUM_ID));
 
+
                 // Save to audioList
                 audioList.add(new Audio(data, title, album, artist, albumId));
                 Log.i(TAG, "ISLAM loadAudio: "+audioList.get(0));
@@ -129,6 +121,45 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
             MediaAdapter adapter = new MediaAdapter(audioList, getApplication(), this, itemLayout);
             recyclerView.setAdapter(adapter);
 
+            recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+                @Override
+                public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
+                    super.onScrollStateChanged(recyclerView, newState);
+                    switch (newState) {
+                        case RecyclerView.SCROLL_STATE_IDLE:
+                            Log.i(TAG, "OOO onScrollStateChanged: The RecyclerView is not scrolling");
+                            break;
+                        case RecyclerView.SCROLL_STATE_DRAGGING:
+                            Log.i(TAG, "OOO onScrollStateChanged: Scrolling now");
+                            break;
+                        case RecyclerView.SCROLL_STATE_SETTLING:
+                            Log.i(TAG, "OOO onScrollStateChanged: Scroll Settling");
+                            break;
+
+                    }
+                }
+
+                @Override
+                public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                    super.onScrolled(recyclerView, dx, dy);
+                    if (dx > 0) {
+                        Log.i(TAG, "OOO onScrolled: Right");
+                    } else if (dx < 0) {
+                        Log.i(TAG, "OOO onScrolled: Left");
+                    } else {
+                        Log.i(TAG, "OOO onScrolled: No horizontal scroll");
+                    }
+
+                    if (dy > 0) {
+                        Log.i(TAG, "OOO onScrolled: Downward");
+                    } else if (dy < 0) {
+                        Log.i(TAG, "OOO onScrolled: Upwards");
+                    } else {
+                        Log.i(TAG, "OOO onScrolled: No vertical scroll");
+                    }
+                }
+            });
+
         }
         else {
             Snackbar snackbar = Snackbar
@@ -142,7 +173,7 @@ public class MainActivity extends AppCompatActivity implements MediaClickListene
         Intent tempIntent = new Intent(this, PlayingActivity.class);
         Gson gson = new Gson();
         String jsonArrayList = gson.toJson(audioList);
-        Log.i(TAG, "MAWZY playAudio: " + audio);
+        Log.i(TAG, "HHH playAudio: " + audio);
         tempIntent.putExtra("index", audioIndex);
         tempIntent.putExtra("albumId", audio.getAlbumId());
         tempIntent.putExtra("jsonArrayList", jsonArrayList);

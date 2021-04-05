@@ -19,6 +19,13 @@ MediaPlayer class
 
 # Screen shots: 
 ---
+# Features: 
+Load device audios and play them. <br>
+Control playing audio via either activity or notification. <br>
+Ability to work in background. <br>
+Handling incoming calls, and when sound focus is lost. <br>
+Ability to speed, and slow the audio, repeat, and not repeat it. <br>
+
 
 <p align="center">
  <img src = "images/1.jpg" width = "256">
